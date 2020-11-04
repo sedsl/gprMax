@@ -43,6 +43,8 @@ from gprMax.utilities import human_size
 from gprMax.utilities import logo
 from gprMax.utilities import open_path_file
 
+import torch
+import cv2
 
 def main():
     """This is the main function for gprMax."""
@@ -217,6 +219,7 @@ def run_std_sim(args, inputfile, usernamespace, optparams=None):
     numbermodelruns = args.n
 
     tsimstart = perf_counter()
+    simulations = []
     for currentmodelrun in range(modelstart, modelend):
         # If Taguchi optimistaion, add specific value for each parameter to
         # optimise for each experiment to user accessible namespace
@@ -227,7 +230,17 @@ def run_std_sim(args, inputfile, usernamespace, optparams=None):
             modelusernamespace.update({'optparams': tmp})
         else:
             modelusernamespace = usernamespace
-        run_model(args, currentmodelrun, modelend - 1, numbermodelruns, inputfile, modelusernamespace)
+        _, (i, data) = run_model(args, currentmodelrun,
+                                 modelend - 1, numbermodelruns,
+                                 inputfile, modelusernamespace)
+        simulations.append(data)
+    simulations_array = np.array(simulations).T
+    tensor = torch.from_numpy(simulations_array)
+    path = os.path.join(inputfile.name[:-2] + "pt")
+    print('Simulation path:', path)
+    torch.save(tensor, path)
+    #cv2.imwrite(path[:-2] + 'png', tensor.numpy())
+
     tsimend = perf_counter()
     simcompletestr = '\n=== Simulation completed in [HH:MM:SS]: {}'.format(datetime.timedelta(seconds=tsimend - tsimstart))
     print('{} {}\n'.format(simcompletestr, '=' * (get_terminal_width() - 1 - len(simcompletestr))))

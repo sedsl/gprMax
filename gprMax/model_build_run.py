@@ -371,7 +371,7 @@ def run_model(args, currentmodelrun, modelend, numbermodelruns, inputfile, usern
             tsolve, memsolve = solve_gpu(currentmodelrun, modelend, G)
 
         # Write an output file in HDF5 format
-        write_hdf5_outputfile(outputfile, G.Ex, G.Ey, G.Ez, G.Hx, G.Hy, G.Hz, G)
+        #write_hdf5_outputfile(outputfile, G.Ex, G.Ey, G.Ez, G.Hx, G.Hy, G.Hz, G)
 
         # Write any snapshots to file
         if G.snapshots:
@@ -397,10 +397,10 @@ def run_model(args, currentmodelrun, modelend, numbermodelruns, inputfile, usern
 
     # If geometry information to be reused between model runs then FDTDGrid
     # class instance must be global so that it persists
-    if not args.geometry_fixed:
-        del G
+    #if not args.geometry_fixed:
+    #    del G
 
-    return tsolve
+    return tsolve, (currentmodelrun, G.rxs[0].outputs['Ez'])
 
 
 def solve_cpu(currentmodelrun, modelend, G):
